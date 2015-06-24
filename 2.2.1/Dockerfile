@@ -36,6 +36,7 @@ RUN git clone https://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plu
 ENV PATH /usr/local/rbenv/shims:/usr/local/rbenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV RBENV_ROOT /usr/local/rbenv
 RUN rbenv install 2.2.1
+RUN echo 'gem: --no-rdoc --no-ri' >> .gemrc
 RUN rbenv global 2.2.1
 RUN rbenv rehash
 RUN gem install bundler
