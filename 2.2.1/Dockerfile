@@ -1,43 +1,44 @@
 FROM ubuntu:14.04
 
-WORKDIR /root
-USER root
+# User ubuntu
+RUN apt-get update
+RUN apt-get -y install sudo
+RUN useradd ubuntu && echo "ubuntu:ubuntu" | chpasswd && adduser ubuntu sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN mkdir -p /home/ubuntu && chown -R ubuntu:ubuntu /home/ubuntu
+USER ubuntu
+CMD /bin/bash
+WORKDIR /home/ubuntu
 
 # System Packages
-RUN apt-get update
-RUN apt-get -y install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev python-software-properties libffi-dev
-RUN apt-get -y install libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev wget
+RUN sudo apt-get -y install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev python-software-properties libffi-dev
+RUN sudo apt-get -y install libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev wget
+RUN sudo apt-get -y install libmysqlclient-dev
 
 # Install Elasticsearch
-RUN apt-get -y install openjdk-7-jre-headless
+RUN sudo apt-get -y install openjdk-7-jre-headless
 RUN wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.5.0.deb
-RUN dpkg -i elasticsearch-1.5.0.deb
+RUN sudo dpkg -i elasticsearch-1.5.0.deb
 
 # Install Wrapper for Elasticsearch
 RUN curl -L http://github.com/elasticsearch/elasticsearch-servicewrapper/tarball/master | tar -xz
-RUN mkdir /usr/local/share/elasticsearch
-RUN mkdir /usr/local/share/elasticsearch/bin
-RUN mv *servicewrapper*/service /usr/local/share/elasticsearch/bin/
+RUN sudo mkdir /usr/local/share/elasticsearch
+RUN sudo mkdir /usr/local/share/elasticsearch/bin
+RUN sudo mv *servicewrapper*/service /usr/local/share/elasticsearch/bin/
 RUN rm -Rf *servicewrapper*
 
 # Install rbenv
-RUN git clone https://github.com/sstephenson/rbenv.git /usr/local/rbenv
-RUN echo '# rbenv setup' > /etc/profile.d/rbenv.sh
-RUN echo 'export RBENV_ROOT=/usr/local/rbenv' >> /etc/profile.d/rbenv.sh
-RUN echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> /etc/profile.d/rbenv.sh
-RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
-RUN chmod +x /etc/profile.d/rbenv.sh
-
-# Install ruby-build
-RUN mkdir /usr/local/rbenv/plugins
-RUN git clone https://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plugins/ruby-build
+RUN git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
+RUN git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+ADD rbenv.sh /etc/drone.d/
+ADD rbenv.sh /etc/profile.d/
 
 # Install ruby 2.2.1
-ENV PATH /usr/local/rbenv/shims:/usr/local/rbenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ENV RBENV_ROOT /usr/local/rbenv
-RUN rbenv install 2.2.1
+ENV CONFIGURE_OPTS --disable-install-doc
+RUN bash -lc 'rbenv install 2.2.1'
+
+# Bundler
 RUN echo 'gem: --no-rdoc --no-ri' >> .gemrc
-RUN rbenv global 2.2.1
-RUN rbenv rehash
-RUN gem install bundler
-RUN rbenv rehash
+RUN bash -lc 'rbenv global 2.2.1; gem install rbenv-rehash'
+RUN bash -lc 'rbenv global 2.2.1; gem install bundler'
+RUN bash -lc 'rbenv rehash'
