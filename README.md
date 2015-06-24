@@ -1,4 +1,9 @@
-# Dockerfile for inpos-core with Ruby and Elasticsearch
+Dockerfile for inpos-core 
+=========================
+
+With Ruby and Elasticsearch
+
+## Usage
 
 ```sh
 # Ruby 2.2.1
