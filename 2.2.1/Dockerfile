@@ -32,13 +32,19 @@ RUN git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
 RUN git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
 ADD rbenv.sh /etc/drone.d/
 ADD rbenv.sh /etc/profile.d/
+ENV PATH /home/ubuntu/.rbenv/shims:/home/ubuntu/.rbenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV RBENV_ROOT /home/ubuntu/.rbenv
+RUN eval "$(rbenv init -)"
 
 # Install ruby 2.2.1
 ENV CONFIGURE_OPTS --disable-install-doc
-RUN bash -lc 'rbenv install 2.2.1'
+RUN rbenv install 2.2.1
+RUN rbenv global 2.2.1
+RUN rbenv rehash
+RUN ruby -v
 
 # Bundler
 RUN echo 'gem: --no-rdoc --no-ri' >> .gemrc
-RUN bash -lc 'rbenv global 2.2.1; gem install rbenv-rehash'
-RUN bash -lc 'rbenv global 2.2.1; gem install bundler'
-RUN bash -lc 'rbenv rehash'
+RUN gem install rbenv-rehash
+RUN gem install bundler
+RUN rbenv rehash
