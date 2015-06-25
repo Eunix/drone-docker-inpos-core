@@ -1,34 +1,18 @@
-FROM ubuntu:14.04
+FROM bradrydzewski/base
 
-# User ubuntu (does not work with current docker)
-RUN apt-get update
-RUN apt-get -y install sudo
-# RUN useradd ubuntu && echo "ubuntu:ubuntu" | chpasswd && adduser ubuntu sudo
-# RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-# RUN mkdir -p /home/ubuntu && chown -R ubuntu:ubuntu /home/ubuntu
-# USER ubuntu
-# CMD /bin/bash
-# WORKDIR /home/ubuntu
+USER root
+WORKDIR /root
 
 # System Packages
-RUN sudo apt-get -y install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev python-software-properties libffi-dev
-RUN sudo apt-get -y install libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev wget
-RUN sudo apt-get -y install libmysqlclient-dev nodejs mysql-client-5.6
+RUN apt-get -y install libmysqlclient-dev nodejs
 
 # Install Elasticsearch
-RUN sudo apt-get -y install openjdk-7-jre-headless
+RUN apt-get -y install openjdk-7-jre-headless
 RUN wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.5.0.deb
-RUN sudo dpkg -i elasticsearch-1.5.0.deb
+RUN dpkg -i elasticsearch-1.5.0.deb
 RUN mkdir /usr/share/elasticsearch/config
 RUN cp /etc/elasticsearch/elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml
 RUN cp /etc/elasticsearch/logging.yml /usr/share/elasticsearch/config/logging.yml
-
-# Install Wrapper for Elasticsearch
-# RUN curl -L http://github.com/elasticsearch/elasticsearch-servicewrapper/tarball/master | tar -xz
-# RUN sudo mkdir /usr/local/share/elasticsearch
-# RUN sudo mkdir /usr/local/share/elasticsearch/bin
-# RUN sudo mv *servicewrapper*/service /usr/local/share/elasticsearch/bin/
-# RUN rm -Rf *servicewrapper*
 
 # Install rbenv
 RUN git clone https://github.com/sstephenson/rbenv.git /usr/local/rbenv
