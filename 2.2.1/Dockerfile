@@ -4,7 +4,8 @@ USER root
 WORKDIR /root
 
 # System Packages
-RUN apt-get -y install libmysqlclient-dev nodejs
+RUN apt-get update
+RUN apt-get -y install nodejs
 
 # Install Elasticsearch
 RUN apt-get -y install openjdk-7-jre-headless
